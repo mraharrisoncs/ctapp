@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Welcome to the Computational Thinking App!</h2>
+<p>This app helps teachers learn and teach computational thinking concepts.</p>
+<ul>
+    <li><a href="{{ url_for('module', module_name='abstraction') }}">Abstraction</a></li>
+    <li><a href="{{ url_for('module', module_name='decomposition') }}">Decomposition</a></li>
+    <li><a href="{{ url_for('module', module_name='structured_programming') }}">Structured Programming</a></li>
+</ul>
+{% endblock %}

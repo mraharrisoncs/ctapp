@@ -1,0 +1,20 @@
+{
+    "abstraction": [
+        {
+            "text": "What is abstraction?",
+            "options": ["Removing details", "Breaking down problems", "Repeating steps"]
+        }
+    ],
+    "decomposition": [
+        {
+            "text": "What is decomposition?",
+            "options": ["Breaking down problems", "Ignoring irrelevant details", "Sorting data"]
+        }
+    ],
+    "structured_programming": [
+        {
+            "text": "Which is a principle of structured programming?",
+            "options": ["Sequence", "Abstraction", "Data hiding"]
+        }
+    ]
+}

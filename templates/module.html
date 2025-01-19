@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ module_name|capitalize }}</h2>
+<p>Here you'll find resources and exercises to learn about {{ module_name }}.</p>
+<a href="{{ url_for('quiz', module_name=module_name) }}">Take the Quiz</a>
+{% endblock %}
