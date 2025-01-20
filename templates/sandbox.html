@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Python Coding Sandbox</h2>
+<textarea id="code" rows="10" cols="50">print("Hello, world!")</textarea><br>
+<button id="run">Run Code</button>
+<button id="help">Help Me</button>
+<pre id="output"></pre>
+<pre id="error"></pre>
+<pre id="success" style="color: green; display: none;"></pre>
+<pre id="failure" style="color: red; display: none;"></pre>
+<pre id="run-duration" style="color: blue; display: none;">Run Duration: <span id="run-duration-value"></span> ms</pre>
+<pre id="readability-score" style="color: teal; display: none;">Flake8 Issues: <span id="readability-score-value"></span></pre>
+<pre id="best-score" style="color: purple; display: none;">Best Flake8 Score: <span id="best-score-value"></span></pre>
+<pre id="message" style="color: orange; display: none;"></pre>
+
+<h3>Example Code Snippets</h3>
+<ul>
+    {% for example in examples %}
+    <li>
+        <a href="#" class="example-link" data-code="{{ example.code|e }}" data-index="{{ loop.index0 }}">{{ example.title }}</a>
+        <p>{{ example.description }}</p>
+        <pre>{{ example.code }}</pre>
+    </li>
+    {% endfor %}
+</ul>
+
+<script>
+document.getElementById('run').addEventListener('click', function() {
+    const code = document.getElementById('code').value;
+    const exampleIndex = document.querySelector('.example-link.active')?.dataset.index;
+    
+    fetch('/sandbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, example_index: exampleIndex })
+    }).then(response => response.json()).then(data => {
+        document.getElementById('output').textContent = data.output;
+        document.getElementById('error').textContent = data.error;
+        if (data.success) {
+            document.getElementById('success').style.display = 'block';
+            document.getElementById('failure').style.display = 'none';
+            document.getElementById('success').textContent = 'Success! Your code matches the expected output.';
+        } else {
+            document.getElementById('success').style.display = 'none';
+            document.getElementById('failure').style.display = 'block';
+            document.getElementById('failure').textContent = 'Keep trying! Your code does not match the expected output.';
+        }
+        if (data.run_duration !== null && data.run_duration !== undefined) {
+            document.getElementById('run-duration').style.display = 'block';
+            document.getElementById('run-duration-value').textContent = data.run_duration.toFixed(2);
+        } else {
+            document.getElementById('run-duration').style.display = 'none';
+        }
+        if (data.readability_score !== null && data.readability_score !== undefined) {
+            document.getElementById('readability-score').style.display = 'block';
+            document.getElementById('readability-score-value').textContent = data.readability_score;
+        } else {
+            document.getElementById('readability-score').style.display = 'none';
+        }
+        if (data.best_score !== null && data.best_score !== undefined) {
+            document.getElementById('best-score').style.display = 'block';
+            document.getElementById('best-score-value').textContent = data.best_score;
+        } else {
+            document.getElementById('best-score').style.display = 'none';
+        }
+        if (data.message !== null && data.message !== undefined) {
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').textContent = data.message;
+        } else {
+            document.getElementById('message').style.display = 'none';
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        document.getElementById('error').textContent = 'An error occurred while processing your request.';
+    });
+});
+
+document.getElementById('help').addEventListener('click', function() {
+    const exampleIndex = document.querySelector('.example-link.active')?.dataset.index;
+    
+    if (exampleIndex !== undefined) {
+        fetch('/get_refactored_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ example_index: exampleIndex })
+        }).then(response => response.json()).then(data => {
+            document.getElementById('code').value = data.refactored_code;
+        }).catch(error => {
+            console.error('Error:', error);
+            document.getElementById('error').textContent = 'An error occurred while fetching the refactored code.';
+        });
+    } else {
+        alert("Please select an example first.");
+    }
+});
+
+document.querySelectorAll('.example-link').forEach(link => {
+    link.addEventListener('click', function(event) {
+        event.preventDefault();
+        const code = event.target.dataset.code;
+        document.getElementById('code').value = code;
+        
+        // Highlight the selected example link
+        document.querySelectorAll('.example-link').forEach(link => link.classList.remove('active'));
+        event.target.classList.add('active');
+    });
+});
+</script>
+
+<style>
+.example-link.active {
+    font-weight: bold;
+    color: blue;
+}
+</style>
+{% endblock %}
