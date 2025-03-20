@@ -1,0 +1,6 @@
+# Title: Unstructured Function
+# Description: This example shows a function that lacks structure and readability.
+def calculate_area(length, width):
+    area = length * width
+    return area
+print(calculate_area(5, 3))

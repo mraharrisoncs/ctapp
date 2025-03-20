@@ -16,7 +16,7 @@
 
 <h3>Example Code Snippets</h3>
 <ul>
-    {% for example in examples %}
+    {% for example in examples["examples"] %}
     <li>
         <a href="#" class="example-link" data-code="{{ example.code|e }}" data-index="{{ loop.index0 }}">{{ example.title }}</a>
         <p>{{ example.description }}</p>

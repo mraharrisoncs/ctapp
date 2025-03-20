@@ -1,0 +1,10 @@
+# Title: Unstructured Function (Refactored)
+# Description: This example shows a structured and readable function.
+def calculate_area(length, width):
+    """Calculate the area of a rectangle given its length and width."""
+    return length * width
+
+if __name__ == "__main__":
+    length = 5
+    width = 3
+    print(f"The area is {calculate_area(length, width)}")

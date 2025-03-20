@@ -1,0 +1,6 @@
+# Title: Inefficient Loop
+# Description: This example demonstrates an inefficient way to sum numbers.
+total = 0 # test
+for i in range(1, 12):
+    total += i
+print(total)

@@ -1,9 +1,7 @@
-import json
+import json, subprocess, time, tempfile, os
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-import subprocess
-import time
-import tempfile
+from examples_loader import load_examples
 
 app = Flask(__name__)
 CORS(app)
@@ -11,26 +9,13 @@ CORS(app)
 # Dictionary to store the best scores for each example
 best_scores = {}
 
+# Load examples from the examples directory
+examples_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "examples")
+examples = load_examples(examples_dir)
+
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/module/<string:module_name>')
-def module(module_name):
-    return render_template('module.html', module_name=module_name)
-
-@app.route('/quiz/<string:module_name>', methods=['GET', 'POST'])
-def quiz(module_name):
-    if request.method == 'POST':
-        answers = request.json
-        # Handle quiz submission logic here
-        return jsonify({"result": "success"})
-
-    # Load quiz questions from JSON file
-    with open('data/quizzes.json', 'r') as f:
-        quizzes = json.load(f)
-        quiz_questions = quizzes.get(module_name, [])
-    return render_template('quiz.html', module_name=module_name, questions=quiz_questions)
 
 @app.route('/sandbox', methods=['GET', 'POST'])
 def sandbox():
@@ -95,12 +80,12 @@ def sandbox():
                     message = "Keep trying! Your code does not match the expected output."
 
                 return jsonify({
-                    'output': output, 
-                    'error': error, 
-                    'success': success, 
-                    'run_duration': run_duration, 
+                    'output': output,
+                    'error': error,
+                    'success': success,
+                    'run_duration': run_duration,
                     'readability_score': readability_score,
-                    'best_score': best_score_str, 
+                    'best_score': best_score_str,
                     'improved': improved,
                     'message': message,
                     'flake8_output': flake8_output
@@ -108,8 +93,6 @@ def sandbox():
             except subprocess.TimeoutExpired:
                 return jsonify({'output': '', 'error': 'Code execution timed out.', 'success': False, 'run_duration': None, 'readability_score': None, 'best_score': None, 'improved': False, 'message': 'Code execution timed out.'})
         
-        with open('data/examples.json', 'r') as f:
-            examples = json.load(f)['examples']
         return render_template('sandbox.html', examples=examples)
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -119,22 +102,12 @@ def sandbox():
 def get_refactored_code():
     try:
         example_index = request.json.get('example_index')
-        with open('data/examples.json', 'r') as f:
-            examples = json.load(f)['examples']
-            refactored_code = examples[int(example_index)]['refactored_code']
-            expected_output = subprocess.run(['python', '-c', refactored_code], capture_output=True, text=True).stdout.strip()
+        refactored_code = examples["examples"][int(example_index)]["refactored_code"]
+        expected_output = subprocess.run(['python', '-c', refactored_code], capture_output=True, text=True).stdout.strip()
         return jsonify({'refactored_code': refactored_code, 'expected_output': expected_output})
     except Exception as e:
         print(f"An error occurred while fetching refactored code: {e}")
         return jsonify({'refactored_code': '', 'error': f'An error occurred: {str(e)}'})
-
-def is_code_similar(code1, code2):
-    # Normalize the code by removing leading/trailing whitespace and ignoring empty lines
-    code1_lines = [line.strip() for line in code1.splitlines() if line.strip()]
-    code2_lines = [line.strip() for line in code2.splitlines() if line.strip()]
-    
-    # Compare the normalized code lines
-    return code1_lines == code2_lines
 
 def run_flake8(code):
     flake8_path = r'C:\Users\alan\AppData\Roaming\Python\Python312\Scripts\flake8.exe'  # Use flake8 from the PATH

@@ -1,0 +1,3 @@
+# Title: Inefficient Loop (Refactored)
+# Description: This example demonstrates an efficient way to sum numbers.
+print(sum(range(1, 11)))
